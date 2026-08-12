@@ -1,0 +1,58 @@
+server:
+  port: ${SERVER_PORT:8081}
+
+spring:
+  application:
+    name: upload-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+
+jwt:
+  secret: ${JWT_SECRET:fiapx-super-secret-key-that-is-long-enough-for-hs256}
+
+minio:
+  url: ${MINIO_URL:http://localhost:9000}
+  access-key: ${MINIO_ACCESS_KEY:minioadmin}
+  secret-key: ${MINIO_SECRET_KEY:minioadmin}
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    operations-sorter: method
+  show-actuator: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  metrics:
+    tags:
+      service: upload-service
