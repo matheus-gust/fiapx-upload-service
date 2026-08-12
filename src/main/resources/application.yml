@@ -21,12 +21,13 @@ spring:
       max-request-size: 500MB
 
 jwt:
-  secret: ${JWT_SECRET:fiapx-super-secret-key-that-is-long-enough-for-hs256}
+  secret: ${JWT_SECRET:fiapx-secret-key-change-in-production-must-be-256bits}
 
 minio:
-  url: ${MINIO_URL:http://localhost:9000}
+  endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
   access-key: ${MINIO_ACCESS_KEY:minioadmin}
   secret-key: ${MINIO_SECRET_KEY:minioadmin}
+  bucket: ${MINIO_BUCKET:fiapx-videos}
 
 springdoc:
   api-docs:
@@ -35,8 +36,6 @@ springdoc:
   swagger-ui:
     enabled: true
     path: /swagger-ui.html
-    operations-sorter: method
-  show-actuator: false
 
 management:
   endpoints:
@@ -48,11 +47,6 @@ management:
       show-details: always
       probes:
         enabled: true
-  health:
-    livenessstate:
-      enabled: true
-    readinessstate:
-      enabled: true
   metrics:
     tags:
       service: upload-service
