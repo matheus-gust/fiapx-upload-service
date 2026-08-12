@@ -216,7 +216,13 @@
 						<exclude>**/config/**</exclude>
 						<exclude>**/*Application.class</exclude>
 						<exclude>**/dtos/**</exclude>
-						<exclude>**/infra/persistence/**/*Entity.class</exclude>
+						<exclude>**/security/**</exclude>
+						<exclude>**/api/**</exclude>
+						<exclude>**/infra/**</exclude>
+						<exclude>**/domain/model/**</exclude>
+						<exclude>**/domain/valueobjects/**</exclude>
+						<exclude>**/domain/shared/**</exclude>
+						<exclude>**/application/messaging/**</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
