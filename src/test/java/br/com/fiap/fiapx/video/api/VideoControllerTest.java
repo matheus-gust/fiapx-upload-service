@@ -1,13 +1,16 @@
 package br.com.fiap.fiapx.video.api;
 
+import br.com.fiap.fiapx.config.SecurityConfig;
 import br.com.fiap.fiapx.video.application.VideoService;
 import br.com.fiap.fiapx.video.application.dtos.VideoResponseDTO;
 import br.com.fiap.fiapx.video.domain.model.VideoStatus;
+import br.com.fiap.fiapx.video.infra.security.JwtAuthFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -20,18 +23,17 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(VideoController.class)
+@Import({SecurityConfig.class, JwtAuthFilter.class})
 class VideoControllerTest {
 
     @Autowired MockMvc mockMvc;
     @Autowired ObjectMapper objectMapper;
 
     @MockBean VideoService videoService;
-    @MockBean br.com.fiap.fiapx.video.infra.security.JwtAuthFilter jwtAuthFilter;
 
     private VideoResponseDTO buildResponse(VideoStatus status) {
         return new VideoResponseDTO(UUID.randomUUID(), "video.mp4", status, null, null,
@@ -44,7 +46,7 @@ class VideoControllerTest {
         MockMultipartFile file = new MockMultipartFile("file", "video.mp4", "video/mp4", "data".getBytes());
         when(videoService.upload(any(), eq("user@test.com"))).thenReturn(buildResponse(VideoStatus.PENDING));
 
-        mockMvc.perform(multipart("/videos").file(file).with(csrf()))
+        mockMvc.perform(multipart("/videos").file(file))
                 .andExpect(status().isAccepted())
                 .andExpect(jsonPath("$.status").value("PENDING"));
     }
