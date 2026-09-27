@@ -13,4 +13,4 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
-    baseline-on-migrate: true
+    table: flyway_schema_history_upload
