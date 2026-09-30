@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,10 +49,20 @@ public class VideoService {
         return toDTO(video);
     }
 
+    public InputStream download(UUID id, String userEmail) {
+        Video video = videoRepository.findById(id)
+                .filter(v -> v.getUserEmail().equals(userEmail))
+                .orElseThrow(() -> new IllegalArgumentException("Vídeo não encontrado"));
+        if (video.getStatus() != VideoStatus.DONE || video.getZipS3Key() == null) {
+            throw new IllegalStateException("Vídeo ainda não foi processado");
+        }
+        return storageService.downloadFile(video.getZipS3Key());
+    }
+
     private VideoResponseDTO toDTO(Video v) {
         String downloadUrl = null;
         if (v.getStatus() == VideoStatus.DONE && v.getZipS3Key() != null) {
-            downloadUrl = storageService.getPresignedDownloadUrl(v.getZipS3Key());
+            downloadUrl = "/videos/" + v.getId() + "/download";
         }
         return new VideoResponseDTO(v.getId(), v.getOriginalFilename(), v.getStatus(),
                 downloadUrl, v.getErrorMessage(), v.getCreatedAt(), v.getUpdatedAt());

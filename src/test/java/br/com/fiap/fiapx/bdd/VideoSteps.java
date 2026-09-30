@@ -73,7 +73,6 @@ public class VideoSteps {
         Video v2 = Video.builder().id(id2).userEmail(email).originalFilename("v2.mp4")
                 .s3Key("k2").status(VideoStatus.PENDING).build();
         when(videoRepository.findByUserEmail(email)).thenReturn(List.of(v1, v2));
-        when(storageService.getPresignedDownloadUrl("z1")).thenReturn("http://url");
     }
 
     @When("o usuario solicita a listagem de seus videos")
