@@ -74,22 +74,4 @@ class MinioStorageServiceTest {
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Falha ao baixar arquivo");
     }
-
-    @Test
-    void getPresignedDownloadUrl_shouldReturnUrl() throws Exception {
-        when(minioClient.getPresignedObjectUrl(any())).thenReturn("http://minio/presigned-url");
-
-        String url = service.getPresignedDownloadUrl("videos/key.mp4");
-
-        assertThat(url).isEqualTo("http://minio/presigned-url");
-    }
-
-    @Test
-    void getPresignedDownloadUrl_shouldWrapExceptionOnFailure() throws Exception {
-        when(minioClient.getPresignedObjectUrl(any())).thenThrow(new RuntimeException("boom"));
-
-        assertThatThrownBy(() -> service.getPresignedDownloadUrl("videos/key.mp4"))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Falha ao gerar URL de download");
-    }
 }

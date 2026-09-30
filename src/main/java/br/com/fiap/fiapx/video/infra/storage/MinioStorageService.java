@@ -45,19 +45,6 @@ public class MinioStorageService {
         }
     }
 
-    public String getPresignedDownloadUrl(String key) {
-        try {
-            return minioClient.getPresignedObjectUrl(
-                    io.minio.GetPresignedObjectUrlArgs.builder()
-                            .bucket(bucket).object(key)
-                            .method(io.minio.http.Method.GET)
-                            .expiry(3600)
-                            .build());
-        } catch (Exception e) {
-            throw new RuntimeException("Falha ao gerar URL de download: " + e.getMessage(), e);
-        }
-    }
-
     private void ensureBucketExists() throws Exception {
         boolean exists = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucket).build());
         if (!exists) {

@@ -15,6 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -66,13 +68,12 @@ class VideoServiceTest {
                 .originalFilename("video.mp4").s3Key("key").zipS3Key("zip-key")
                 .status(VideoStatus.DONE).build();
         when(videoRepository.findByUserEmail("user@test.com")).thenReturn(List.of(doneVideo));
-        when(storageService.getPresignedDownloadUrl("zip-key")).thenReturn("http://minio/download");
 
         List<VideoResponseDTO> result = videoService.listByUser("user@test.com");
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).status()).isEqualTo(VideoStatus.DONE);
-        assertThat(result.get(0).downloadUrl()).isEqualTo("http://minio/download");
+        assertThat(result.get(0).downloadUrl()).isEqualTo("/videos/" + videoId + "/download");
     }
 
     @Test
@@ -92,6 +93,39 @@ class VideoServiceTest {
         assertThatThrownBy(() -> videoService.getById(videoId, "outro@test.com"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("não encontrado");
+    }
+
+    @Test
+    void download_shouldReturnFileWhenVideoIsDone() {
+        Video doneVideo = Video.builder()
+                .id(videoId).userEmail("user@test.com")
+                .originalFilename("video.mp4").s3Key("key").zipS3Key("zip-key")
+                .status(VideoStatus.DONE).build();
+        InputStream fileStream = new ByteArrayInputStream("conteudo".getBytes());
+        when(videoRepository.findById(videoId)).thenReturn(Optional.of(doneVideo));
+        when(storageService.downloadFile("zip-key")).thenReturn(fileStream);
+
+        InputStream result = videoService.download(videoId, "user@test.com");
+
+        assertThat(result).isSameAs(fileStream);
+    }
+
+    @Test
+    void download_shouldThrowWhenVideoNotBelongsToUser() {
+        when(videoRepository.findById(videoId)).thenReturn(Optional.of(pendingVideo));
+
+        assertThatThrownBy(() -> videoService.download(videoId, "outro@test.com"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("não encontrado");
+    }
+
+    @Test
+    void download_shouldThrowWhenVideoNotDoneYet() {
+        when(videoRepository.findById(videoId)).thenReturn(Optional.of(pendingVideo));
+
+        assertThatThrownBy(() -> videoService.download(videoId, "user@test.com"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("ainda não foi processado");
     }
 
     @Test
